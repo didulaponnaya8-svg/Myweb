@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vishwa Mini WhatsApp Bot</title>
+
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: black;
+        color: white;
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+
+    h1 {
+        position: relative;
+        z-index: 2;
+        margin-top: 50px;
+    }
+
+    .btn {
+        position: relative;
+        z-index: 2;
+        display: inline-block;
+        padding: 15px 25px;
+        margin: 15px;
+        font-size: 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .pair-btn {
+        background: #2563eb;
+        color: white;
+    }
+
+    .pair-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .whatsapp-btn {
+        background: #22c55e;
+        color: white;
+    }
+
+    .whatsapp-btn:hover {
+        background: #16a34a;
+    }
+
+    canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+</style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<h1>Vishwa Mini WhatsApp Bot</h1>
+
+<a href="https://railway.com/project/e6741aa6-f4b9-436d-b717-18b4cf61826d" 
+   class="btn pair-btn" target="_blank">
+   Pair Code Button
+</a>
+
+<br>
+
+<a href="https://whatsapp.com/channel/0029VbCkMcxHbFV9OGiwZM30" 
+   class="btn whatsapp-btn" target="_blank">
+   WhatsApp Channel
+</a>
+
+<script>
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%";
+const fontSize = 16;
+const columns = canvas.width / fontSize;
+
+const drops = [];
+
+for (let x = 0; x < columns; x++) {
+    drops[x] = 1;
+}
+
+function draw() {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#0f0";
+    ctx.font = fontSize + "px monospace";
+
+    for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+        }
+
+        drops[i]++;
+    }
+}
+
+setInterval(draw, 33);
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
