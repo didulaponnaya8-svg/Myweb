@@ -11,64 +11,90 @@
 body {
     margin: 0;
     overflow-x: hidden;
-    background: black;
-    color: white;
     font-family: Arial, sans-serif;
     text-align: center;
+    color: white;
+    background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #000000);
+    background-size: 400% 400%;
+    animation: gradientBG 10s ease infinite;
+}
+
+/* ANIMATED GRADIENT */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* FLOATING GLOW BALLS */
+.glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.6;
+    animation: float 10s infinite ease-in-out;
+}
+
+.glow:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    background: #ff00ff;
+    top: 10%;
+    left: 10%;
+}
+
+.glow:nth-child(2) {
+    width: 250px;
+    height: 250px;
+    background: #00ffff;
+    bottom: 10%;
+    right: 15%;
+}
+
+.glow:nth-child(3) {
+    width: 200px;
+    height: 200px;
+    background: #ffff00;
+    top: 50%;
+    left: 50%;
+}
+
+@keyframes float {
+    0%,100% { transform: translateY(0px); }
+    50% { transform: translateY(-50px); }
 }
 
 /* TITLE */
 h1 {
-    position: relative;
-    z-index: 2;
     margin-top: 60px;
     font-family: 'Orbitron', sans-serif;
     font-size: 32px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: #ffff00;
-    text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00;
+    color: #fff;
+    text-shadow: 0 0 15px #00ffff;
 }
 
-/* 3D BUTTON */
+/* BUTTON */
 .btn {
-    position: relative;
-    z-index: 2;
     display: inline-block;
     padding: 15px 35px;
     margin: 20px;
     font-size: 18px;
     border-radius: 15px;
     text-decoration: none;
-    color: #fff;
-    background: linear-gradient(145deg, #111, #000);
+    color: white;
+
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+
     border: 1px solid rgba(255,255,255,0.2);
 
-    box-shadow:
-        0 6px 15px rgba(0,0,0,0.8),
-        inset 0 2px 5px rgba(255,255,255,0.1),
-        inset 0 -2px 5px rgba(0,0,0,0.8);
-
-    transition: 0.2s;
-}
-
-.btn::before {
-    content: "";
-    position: absolute;
-    inset: -2px;
-    border-radius: 15px;
-    background: linear-gradient(45deg, #ffff00, #ffaa00);
-    z-index: -1;
-    filter: blur(6px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: 0.3s;
 }
 
 .btn:hover {
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 10px 25px rgba(255,255,0,0.5);
-}
-
-.btn:active {
-    transform: translateY(3px) scale(0.95);
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #00ffff;
 }
 
 /* LIVE USERS */
@@ -76,62 +102,50 @@ h1 {
     position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 999;
 
-    padding: 10px 18px;
-    border-radius: 12px;
+    padding: 10px 15px;
+    border-radius: 10px;
 
-    background: rgba(0,0,0,0.7);
-    color: #ffff00;
-    font-family: 'Orbitron', sans-serif;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
 
-    box-shadow: 0 0 15px #ffff00;
+    color: #00ffff;
+    box-shadow: 0 0 15px #00ffff;
 }
 
-/* FEATURES BOX */
+/* FEATURES */
 .features-box {
-    position: relative;
-    z-index: 2;
-    margin: 50px auto;
+    margin: 40px auto;
     width: 85%;
-    max-width: 650px;
+    max-width: 600px;
 
-    padding: 25px;
+    padding: 20px;
     border-radius: 15px;
 
-    background: rgba(0,0,0,0.6);
-    border: 1px solid rgba(255,255,0,0.3);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
 
-    box-shadow: 0 0 20px #ffff00;
-    backdrop-filter: blur(8px);
-
+    box-shadow: 0 0 20px #00ffff;
     text-align: left;
 }
 
 .features-box h2 {
     text-align: center;
-    color: #ffff00;
-    margin-bottom: 15px;
+    color: #00ffff;
 }
 
 .features-box li {
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-/* MATRIX */
-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 0;
+    padding: 6px 0;
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="matrix"></canvas>
+<!-- GLOW BACKGROUND -->
+<div class="glow"></div>
+<div class="glow"></div>
+<div class="glow"></div>
 
 <!-- LIVE USERS -->
 <div id="liveUsersBox">
@@ -140,92 +154,33 @@ canvas {
 
 <h1>Vishwa Mini WhatsApp Bot</h1>
 
-<a href="https://vishwa-mini-production-52bd.up.railway.app/" class="btn" target="_blank">
-🚀 DEPLOY BOT
-</a>
-
+<a href="#" class="btn">🚀 DEPLOY BOT</a>
 <br>
+<a href="#" class="btn">💬 WhatsApp Channel</a>
 
-<a href="https://whatsapp.com/channel/0029VbCkMcxHbFV9OGiwZM30" class="btn" target="_blank">
-💬 WhatsApp Channel
-</a>
-
-<!-- FEATURES -->
 <div class="features-box">
-    <h2>⚙️ Bot Features</h2>
-    <ul>
-        <li>✔️ Advanced Command System with 100+ Commands</li>
-        <li>✔️ Auto Reply & Smart Response Features</li>
-        <li>✔️ Group Management Tools (Kick, Add, Promote, Demote)</li>
-        <li>✔️ Fun & Entertainment Commands (Games, Memes, Jokes)</li>
-        <li>✔️ Media Download (YouTube, TikTok, Facebook, etc.)</li>
-        <li>✔️ AI Chat & Smart Assistant Integration</li>
-        <li>✔️ Custom Settings & Full Control Panel</li>
-        <li>✔️ Anti-Link, Anti-Spam & Security Features</li>
-        <li>✔️ Sticker, Logo & Image Generator Tools</li>
-        <li>✔️ 24/7 Online & Fast Performance</li>
-    </ul>
+<h2>⚙️ Bot Features</h2>
+<ul>
+<li>✔️ Advanced Command System</li>
+<li>✔️ Smart Auto Reply</li>
+<li>✔️ Group Management Tools</li>
+<li>✔️ Fun & Media Commands</li>
+<li>✔️ AI Integration</li>
+<li>✔️ Full Custom Settings</li>
+</ul>
 </div>
 
 <script>
-// MATRIX
-const canvas = document.getElementById("matrix");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const letters = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const fontSize = 16;
-const columns = Math.floor(canvas.width / fontSize);
-const drops = Array(columns).fill(1);
-
-function draw() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "#ffff00";
-    ctx.font = fontSize + "px monospace";
-
-    for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-
-        ctx.shadowColor = "#ffff00";
-        ctx.shadowBlur = 12;
-
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.97) {
-            drops[i] = 0;
-        }
-
-        drops[i]++;
-    }
-}
-setInterval(draw, 30);
-
-// FAKE USERS
+// fake users
 let count = Math.floor(Math.random() * 20) + 5;
 
-function updateUsers() {
-    let change = Math.floor(Math.random() * 3);
-
-    if (Math.random() > 0.5) count += change;
-    else count -= change;
-
+setInterval(() => {
+    count += Math.random() > 0.5 ? 1 : -1;
     if (count < 5) count = 5;
-    if (count > 99) count = 99;
+    if (count > 50) count = 50;
 
     document.getElementById("userCount").innerText = count;
-}
-updateUsers();
-setInterval(updateUsers, 2000);
-
-// RESIZE
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+}, 2000);
 </script>
 
 </body>
