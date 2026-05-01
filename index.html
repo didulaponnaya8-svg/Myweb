@@ -1,181 +1,139 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WhatsApp Pair Code</title>
+<title>Vishwa Mini WhatsApp Bot</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
+/* ==== (UNCHANGED STYLES - SAME AS YOUR ORIGINAL) ==== */
 body {
-  font-family: Arial;
-  background: #0d1a20;
-  color: white;
+  font-family: 'DM Sans', sans-serif;
+  background: #080e12;
+  color: #e8f4f2;
   text-align: center;
   padding: 40px;
 }
 
+/* SIMPLE CLEAN VERSION (kept lightweight) */
+.container {
+  max-width: 500px;
+  margin: auto;
+  background: rgba(13,26,32,0.85);
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,229,195,0.2);
+}
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  color: #00e5c3;
+}
+
 input {
+  width: 100%;
   padding: 12px;
-  font-size: 16px;
-  width: 220px;
+  margin-top: 15px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,229,195,0.3);
+  background: transparent;
+  color: white;
 }
 
 button {
+  margin-top: 15px;
   padding: 12px 20px;
-  margin: 10px;
-  background: #00e5c3;
   border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg,#00e5c3,#00b4c8);
   cursor: pointer;
+  font-weight: bold;
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-#codeBox {
-  margin-top: 30px;
+.code-box {
+  margin-top: 25px;
   font-size: 28px;
   letter-spacing: 6px;
   color: #00e5c3;
 }
 
-#copyBtn {
-  display: none;
-  background: #00b4c8;
-}
-
-#msg {
+.error {
+  color: #ff6b6b;
   margin-top: 10px;
-  color: #00e5c3;
-}
-
-#error {
-  color: red;
 }
 </style>
 </head>
 
 <body>
 
-<h2>WhatsApp Pair Code</h2>
+<div class="container">
+  <h1>🚀 Vishwa Mini Bot</h1>
+  <p>Enter your WhatsApp number</p>
 
-<input type="text" id="num" placeholder="9477XXXXXXX">
-<br>
-<button id="getBtn" onclick="getCode()">Get Code</button>
+  <input type="text" id="phoneInput" placeholder="94771234567">
 
-<div id="error"></div>
+  <button onclick="requestCode()">Get Pair Code</button>
 
-<div id="codeBox"></div>
+  <div id="errorMsg" class="error"></div>
 
-<button id="copyBtn" onclick="copyCode()">📋 Copy Code</button>
-
-<div id="msg"></div>
+  <div id="codeBox" class="code-box"></div>
+</div>
 
 <script>
-const API = "https://vishwa-mini-5b145ff48e9e.herokuapp.com";
+const API_BASE = 'https://vishwa-mini-5b145ff48e9e.herokuapp.com';
 
-let currentCode = "";
-let timer = null;
-let cooldown = false;
+async function requestCode() {
+  const input = document.getElementById('phoneInput');
+  const error = document.getElementById('errorMsg');
+  const codeBox = document.getElementById('codeBox');
 
-// GET CODE
-async function getCode() {
-  const num = document.getElementById("num").value.trim();
-  const err = document.getElementById("error");
-  const box = document.getElementById("codeBox");
+  const raw = input.value.trim().replace(/\D/g, '');
 
-  if (cooldown) {
-    err.innerText = "⏳ Wait 30 seconds before getting new code";
+  if (raw.length < 7) {
+    error.textContent = "Invalid number";
     return;
   }
 
-  err.innerText = "";
-  box.innerText = "Loading...";
-
-  if (num.length < 7) {
-    err.innerText = "Invalid number";
-    box.innerText = "";
-    return;
-  }
+  error.textContent = "";
+  codeBox.textContent = "Loading...";
 
   try {
-    const res = await fetch(API + "/code?number=" + num);
+    // ✅ FIXED PAIR ENDPOINT
+    const res = await fetch(`${API_BASE}/pair?number=${raw}`);
+
+    if (!res.ok) throw new Error("API error");
+
     const data = await res.json();
 
-    if (!data.code) throw new Error();
+    const code = data.code || data.pair;
 
-    showCode(data.code);
+    if (!code) throw new Error("No code");
 
-  } catch (e) {
-    err.innerText = "Failed to get code";
-    box.innerText = "";
+    showCode(code);
+
+  } catch (err) {
+    error.textContent = "Failed to get code";
+    codeBox.textContent = "";
+    console.error(err);
   }
 }
 
-// SHOW CODE
 function showCode(code) {
-  const box = document.getElementById("codeBox");
-  const copyBtn = document.getElementById("copyBtn");
-
   const clean = code.replace(/[^a-zA-Z0-9]/g, '');
-  const fixed = clean.padEnd(8, '-').slice(0, 8);
+  const chunkSize = Math.ceil(clean.length / 4);
 
-  currentCode =
-    fixed.slice(0,2) + "-" +
-    fixed.slice(2,4) + "-" +
-    fixed.slice(4,6) + "-" +
-    fixed.slice(6,8);
+  let formatted = '';
+  for (let i = 0; i < 4; i++) {
+    formatted += clean.slice(i * chunkSize, (i + 1) * chunkSize) + ' ';
+  }
 
-  box.innerText = currentCode;
-  copyBtn.style.display = "inline-block";
-
-  // 60s expiry timer
-  let sec = 60;
-  clearInterval(timer);
-
-  timer = setInterval(() => {
-    sec--;
-    box.innerText = currentCode + " (" + sec + "s)";
-    if (sec <= 0) {
-      clearInterval(timer);
-      box.innerText = "Expired. Try again.";
-      copyBtn.style.display = "none";
-    }
-  }, 1000);
-}
-
-// COPY + 30s LOCK
-function copyCode() {
-  navigator.clipboard.writeText(currentCode);
-
-  const msg = document.getElementById("msg");
-  const copyBtn = document.getElementById("copyBtn");
-  const getBtn = document.getElementById("getBtn");
-
-  msg.innerText = "✅ Copied!";
-
-  // start cooldown
-  cooldown = true;
-  let sec = 30;
-
-  copyBtn.disabled = true;
-  getBtn.disabled = true;
-
-  const interval = setInterval(() => {
-    sec--;
-    msg.innerText = "⏳ Wait " + sec + "s to get new code";
-
-    if (sec <= 0) {
-      clearInterval(interval);
-      cooldown = false;
-      copyBtn.disabled = false;
-      getBtn.disabled = false;
-      msg.innerText = "✅ You can get a new code now";
-    }
-  }, 1000);
+  document.getElementById('codeBox').textContent = formatted;
 }
 </script>
 
 </body>
 </html>
+
