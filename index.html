@@ -2,169 +2,1046 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vishwa Mini WhatsApp Bot</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-    color: white;
+  :root {
+    --teal: #00e5c3;
+    --teal-dim: rgba(0,229,195,0.15);
+    --teal-glow: rgba(0,229,195,0.4);
+    --bg-deep: #080e12;
+    --bg-mid: #0d1a20;
+    --bg-card: rgba(13,26,32,0.85);
+    --text: #e8f4f2;
+    --text-muted: rgba(232,244,242,0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-deep);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATED BACKGROUND ── */
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    overflow: hidden;
+  }
+
+  .bg-layer::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(0,229,195,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(0,180,200,0.06) 0%, transparent 60%),
+      linear-gradient(180deg, #080e12 0%, #0a161c 50%, #080e12 100%);
+  }
+
+  /* Floating orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: floatOrb linear infinite;
+    opacity: 0.35;
+  }
+  .orb-1 { width:420px; height:420px; background:radial-gradient(circle,#00e5c3,transparent 70%); top:-100px; left:-80px; animation-duration:18s; animation-delay:0s; }
+  .orb-2 { width:300px; height:300px; background:radial-gradient(circle,#00b4c8,transparent 70%); bottom:10%; right:-80px; animation-duration:22s; animation-delay:-7s; }
+  .orb-3 { width:200px; height:200px; background:radial-gradient(circle,#00e5c3,transparent 70%); top:50%; left:60%; animation-duration:15s; animation-delay:-3s; }
+
+  @keyframes floatOrb {
+    0%   { transform: translate(0,0) scale(1); }
+    25%  { transform: translate(30px,-40px) scale(1.05); }
+    50%  { transform: translate(-20px,30px) scale(0.95); }
+    75%  { transform: translate(40px,10px) scale(1.02); }
+    100% { transform: translate(0,0) scale(1); }
+  }
+
+  /* Grid lines */
+  .grid-lines {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,195,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,195,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Particles */
+  .particles { position: absolute; inset: 0; }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--teal);
+    border-radius: 50%;
+    animation: particleDrift linear infinite;
+    opacity: 0;
+  }
+
+  @keyframes particleDrift {
+    0%   { transform: translateY(100vh) translateX(0); opacity: 0; }
+    10%  { opacity: 0.8; }
+    90%  { opacity: 0.5; }
+    100% { transform: translateY(-20px) translateX(var(--dx, 30px)); opacity: 0; }
+  }
+
+  /* ── LAYOUT ── */
+  .page { position: relative; z-index: 1; }
+
+  section { padding: 80px 24px; max-width: 780px; margin: 0 auto; }
+
+  /* ── HERO ── */
+  .hero {
     text-align: center;
-}
+    padding-top: 100px;
+    padding-bottom: 60px;
+  }
 
-/* HERO */
-.hero {
-    padding: 80px 20px;
-}
-.hero h1 {
-    font-size: 42px;
-}
-.hero p {
-    opacity: 0.8;
-}
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--teal-dim);
+    border: 1px solid rgba(0,229,195,0.25);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    animation: fadeSlideDown 0.8s ease both;
+    animation-delay: 0.1s;
+  }
 
-/* Buttons */
-.btn {
-    display: inline-block;
-    padding: 15px 30px;
-    margin: 10px;
-    background: linear-gradient(145deg, #1e90ff, #0066ff);
+  .hero-badge .dot {
+    width: 6px; height: 6px;
+    background: var(--teal);
+    border-radius: 50%;
+    animation: pulse 1.4s ease infinite;
+    box-shadow: 0 0 8px var(--teal);
+  }
+
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity: 1; }
+    50%  { transform: scale(1.5); opacity: 0.5; }
+  }
+
+  .hero-rocket {
+    font-size: 52px;
+    display: block;
+    margin-bottom: 16px;
+    animation: rocketLaunch 1s cubic-bezier(0.34,1.56,0.64,1) both;
+    animation-delay: 0.2s;
+    filter: drop-shadow(0 0 24px rgba(0,229,195,0.5));
+  }
+
+  @keyframes rocketLaunch {
+    0%   { transform: translateY(60px) rotate(-10deg) scale(0.5); opacity: 0; }
+    100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 7vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    animation: fadeSlideUp 0.9s ease both;
+    animation-delay: 0.35s;
+  }
+
+  .hero-title .gradient-text {
+    background: linear-gradient(135deg, #00e5c3 0%, #00b4e0 50%, #00e5c3 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 4s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0%,100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+
+  .hero-sub {
+    margin-top: 14px;
+    color: var(--text-muted);
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    font-weight: 300;
+    animation: fadeSlideUp 0.9s ease both;
+    animation-delay: 0.5s;
+  }
+
+  .hero-sub span { color: var(--teal); font-weight: 500; }
+
+  .btn-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 36px;
+    animation: fadeSlideUp 0.9s ease both;
+    animation-delay: 0.65s;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 26px;
     border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
     text-decoration: none;
-    color: white;
-    font-weight: bold;
-    box-shadow: 0 10px #003f7f;
-}
-.btn:hover { transform: scale(1.05); }
-.btn:active {
-    transform: translateY(5px);
-    box-shadow: 0 3px #003f7f;
-}
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
 
-/* Sections */
-.section {
-    padding: 60px 20px;
-}
+  .btn::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.08);
+    opacity: 0;
+    transition: opacity 0.2s;
+    border-radius: inherit;
+  }
+  .btn:hover::after { opacity: 1; }
+  .btn:hover { transform: translateY(-3px); }
+  .btn:active { transform: translateY(0); }
 
-/* Cards */
-.container {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-.card {
-    background: rgba(255,255,255,0.05);
-    margin: 15px;
-    padding: 25px;
-    border-radius: 15px;
-    width: 260px;
-    box-shadow: 0 0 15px cyan;
-}
-.card:hover { transform: scale(1.05); }
+  .btn-primary {
+    background: linear-gradient(135deg, #00e5c3, #00b4c8);
+    color: #080e12;
+    box-shadow: 0 0 30px rgba(0,229,195,0.3), 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .btn-primary:hover { box-shadow: 0 0 50px rgba(0,229,195,0.5), 0 8px 24px rgba(0,0,0,0.4); }
 
-/* Stats */
-.stats {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-.stat {
-    margin: 20px;
+  .btn-outline {
+    background: rgba(0,229,195,0.07);
+    color: var(--teal);
+    border: 1px solid rgba(0,229,195,0.35);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  }
+  .btn-outline:hover { box-shadow: 0 0 30px rgba(0,229,195,0.2), 0 8px 24px rgba(0,0,0,0.3); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,229,195,0.25), transparent);
+    margin: 0 auto;
+  }
+
+  /* ── STATS ── */
+  .stats-section { text-align: center; }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
     font-size: 22px;
-}
+    font-weight: 700;
+    margin-bottom: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
 
-/* Online box */
-.online-box {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: black;
-    padding: 10px 15px;
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(0,229,195,0.15);
+    border-radius: 16px;
+    padding: 24px 12px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .stat-card.revealed {
+    animation: cardReveal 0.6s cubic-bezier(0.34,1.2,0.64,1) forwards;
+  }
+
+  @keyframes cardReveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--teal), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .stat-card:hover::before { opacity: 1; }
+  .stat-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(0,229,195,0.4);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 30px rgba(0,229,195,0.1);
+  }
+
+  .stat-icon { font-size: 22px; margin-bottom: 10px; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--teal);
+    text-shadow: 0 0 20px rgba(0,229,195,0.4);
+    counter-reset: num var(--target);
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .feature-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(0,229,195,0.12);
+    border-radius: 18px;
+    padding: 28px 18px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.35s, border-color 0.35s, box-shadow 0.35s;
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+
+  .feature-card.revealed {
+    animation: featureReveal 0.7s cubic-bezier(0.34,1.15,0.64,1) forwards;
+  }
+
+  @keyframes featureReveal {
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .feature-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(0,229,195,0.45);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.5), 0 0 40px rgba(0,229,195,0.12);
+  }
+
+  .feature-glow {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(0,229,195,0.08) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .feature-card:hover .feature-glow { opacity: 1; }
+
+  .feature-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+    filter: drop-shadow(0 0 8px rgba(0,229,195,0.4));
+    transition: transform 0.3s;
+  }
+  .feature-card:hover .feature-icon { transform: scale(1.2) rotate(-5deg); }
+
+  .feature-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 8px;
+    color: var(--teal);
+  }
+
+  .feature-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ── COMMANDS ── */
+  .commands-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .commands-grid.center-last {
+    grid-template-columns: repeat(3,1fr);
+  }
+  .cmd-center-row {
+    display: flex;
+    justify-content: center;
+  }
+
+  .cmd-btn {
+    background: rgba(0,229,195,0.05);
+    border: 1px solid rgba(0,229,195,0.2);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--teal);
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  .cmd-btn.revealed {
+    animation: cmdReveal 0.5s cubic-bezier(0.34,1.4,0.64,1) forwards;
+  }
+
+  @keyframes cmdReveal {
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .cmd-btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(0,229,195,0.1), transparent);
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .cmd-btn:hover::before { opacity: 1; }
+  .cmd-btn:hover {
+    border-color: rgba(0,229,195,0.55);
+    box-shadow: 0 0 20px rgba(0,229,195,0.15), inset 0 0 20px rgba(0,229,195,0.05);
+    transform: translateY(-4px) scale(1.03);
+    color: #fff;
+  }
+
+  .cmd-btn.wide { min-width: 160px; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 32px 24px 48px;
+    border-top: 1px solid rgba(0,229,195,0.08);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.06em;
+    position: relative; z-index: 1;
+  }
+
+  footer .teal { color: var(--teal); }
+
+  /* ── SCROLL ANIMATIONS ── */
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scan line effect */
+  .scanline {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999; pointer-events: none;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--teal), transparent);
+    opacity: 0.4;
+    animation: scanDown 6s linear infinite;
+  }
+  @keyframes scanDown {
+    0%   { top: -2px; opacity: 0; }
+    5%   { opacity: 0.4; }
+    95%  { opacity: 0.2; }
+    100% { top: 100vh; opacity: 0; }
+  }
+
+  
+  @keyframes countUp {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+ 
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(0,229,195,0.08);
+    border: 1px solid rgba(0,229,195,0.2);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--teal);
+    margin-top: 20px;
+    animation: fadeSlideUp 0.9s ease both;
+    animation-delay: 0.8s;
+  }
+  .status-pill .blink {
+    width: 5px; height: 5px; background: #00ff9d;
+    border-radius: 50%; box-shadow: 0 0 6px #00ff9d;
+    animation: blink 1.2s ease infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  @media (max-width: 500px) {
+    .stats-grid { grid-template-columns: repeat(3,1fr); gap: 10px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .commands-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ── PAIRING BOX ── */
+  .pair-box {
+    margin-top: 32px;
+    background: rgba(0,229,195,0.04);
+    border: 1px solid rgba(0,229,195,0.2);
+    border-radius: 20px;
+    padding: 28px 24px 24px;
+    animation: fadeSlideUp 0.9s ease both;
+    animation-delay: 0.85s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pair-box::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--teal), transparent);
+  }
+
+  .pair-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .pair-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  .pair-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(0,229,195,0.25);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+
+  .input-wrap:focus-within {
+    border-color: rgba(0,229,195,0.6);
+    box-shadow: 0 0 20px rgba(0,229,195,0.12);
+  }
+
+  .input-prefix {
+    padding: 0 10px 0 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--teal);
+    user-select: none;
+  }
+
+  .phone-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 13px 14px 13px 0;
+    letter-spacing: 0.06em;
+  }
+
+  .phone-input::placeholder { color: rgba(232,244,242,0.25); }
+
+  .pair-btn {
+    padding: 13px 20px;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+
+  .error-msg {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #ff6b6b;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── SPINNER ── */
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(8,14,18,0.3);
+    border-top-color: #080e12;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hidden { display: none !important; }
+
+  /* ── CODE REVEAL ── */
+  .code-reveal {
+    display: none;
+    margin-top: 20px;
+    animation: codeAppear 0.6s cubic-bezier(0.34,1.3,0.64,1) both;
+  }
+
+  @keyframes codeAppear {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .code-reveal-inner {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(0,229,195,0.35);
+    border-radius: 20px;
+    padding: 28px 20px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .code-reveal-inner::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--teal), transparent);
+  }
+
+  .code-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--teal);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .code-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .code-digit {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--teal);
+    text-shadow: 0 0 24px rgba(0,229,195,0.6);
+    background: rgba(0,229,195,0.07);
+    border: 1px solid rgba(0,229,195,0.25);
     border-radius: 10px;
-    box-shadow: 0 0 15px cyan;
-}
+    width: 52px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    animation: digitPop 0.4s cubic-bezier(0.34,1.5,0.64,1) both;
+  }
 
-/* Footer */
-.footer {
-    padding: 40px;
-    opacity: 0.6;
-}
+  .code-digit:nth-child(1) { animation-delay: 0.05s; }
+  .code-digit:nth-child(3) { animation-delay: 0.15s; }
+  .code-digit:nth-child(5) { animation-delay: 0.25s; }
+  .code-digit:nth-child(7) { animation-delay: 0.35s; }
+
+  @keyframes digitPop {
+    from { opacity: 0; transform: scale(0.4) rotateY(90deg); }
+    to   { opacity: 1; transform: scale(1) rotateY(0deg); }
+  }
+
+  .code-sep {
+    font-size: 22px;
+    color: rgba(0,229,195,0.3);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .code-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+
+  .code-timer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--teal);
+    margin-bottom: 18px;
+    opacity: 0.8;
+  }
+
+  .retry-btn {
+    font-size: 13px;
+    padding: 10px 20px;
+  }
 </style>
 </head>
-
 <body>
 
-<div class="online-box">
-👥 Online: <span id="users">0</span>
+<div class="scanline"></div>
+
+<div class="bg-layer">
+  <div class="grid-lines"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="particles" id="particles"></div>
 </div>
 
-<!-- HERO -->
-<div class="hero">
-<h1>🚀 Vishwa Mini WhatsApp Bot</h1>
-<p>Powerful • Fast • Advanced WhatsApp Automation System</p>
+<div class="page">
 
-<a href="https://vishwa-mini-5b145ff48e9e.herokuapp.com/" target="_blank" class="btn">
-🚀 DEPLOY BOT
-</a>
 
-<a href="https://whatsapp.com/channel/0029VbCkMcxHbFV9OGiwZM30" target="_blank" class="btn">
-💬 WhatsApp Channel
-</a>
+  <section class="hero">
+    <div class="hero-badge"><span class="dot"></span> v2.0 · Live System</div>
+    <span class="hero-rocket">🚀</span>
+    <h1 class="hero-title">
+      <span class="gradient-text">Vishwa Mini</span><br>WhatsApp Bot
+    </h1>
+    <p class="hero-sub">
+      <span>Powerful</span> &nbsp;·&nbsp; <span>Fast</span> &nbsp;·&nbsp; <span>Advanced</span> WhatsApp Automation System
+    </p>
+    <div class="status-pill"><span class="blink"></span> System Online · 24/7 Active</div>
+
+    
+    <div class="pair-box" id="pairBox">
+      <div class="pair-label">📱 Enter Your WhatsApp Number</div>
+      <div class="pair-hint">Include country code · No + or spaces</div>
+      <div class="pair-input-row">
+        <div class="input-wrap">
+          <span class="input-prefix">+</span>
+          <input type="tel" id="phoneInput" class="phone-input" placeholder="94771234567" maxlength="20" inputmode="numeric">
+        </div>
+        <button class="btn btn-primary pair-btn" id="pairBtn" onclick="requestCode()">
+          <span id="btnText">Get Code</span>
+          <span id="btnSpinner" class="spinner hidden"></span>
+        </button>
+      </div>
+      <div id="errorMsg" class="error-msg hidden">⚠️ Please enter a valid number</div>
+    </div>
+
+   
+    <div class="code-reveal" id="codeReveal">
+      <div class="code-reveal-inner">
+        <div class="code-tag">🔐 Your Pairing Code</div>
+        <div class="code-display" id="codeDisplay">
+          <span class="code-digit" id="c1">-</span>
+          <span class="code-sep">-</span>
+          <span class="code-digit" id="c2">-</span>
+          <span class="code-sep">-</span>
+          <span class="code-digit" id="c3">-</span>
+          <span class="code-sep">-</span>
+          <span class="code-digit" id="c4">-</span>
+        </div>
+        <div class="code-info">Open WhatsApp → Linked Devices → Link with phone number</div>
+        <div class="code-timer" id="codeTimer">⏳ Valid for <span id="timerCount">60</span>s</div>
+        <button class="btn btn-outline retry-btn" onclick="resetPairing()">↩ Try Again</button>
+      </div>
+    </div>
+
+  </section>
+
+  <div style="max-width:780px;margin:0 auto;padding:0 24px;"><div class="divider"></div></div>
+
+  
+  
+    <section class="hero">
+    <div class="hero-badge"><span class="dot"></span> v2.0 · Live System</div>
+  
+    <div class="status-pill"><span class="blink"></span> System Online · 24/7 Active</div>
+<div class="btn-row">
+
+  <a href="https://whatsapp.com/channel/0029VbCkMcxHbFV9OGiwZM30" 
+     class="btn btn-outline" target="_blank">💬 WhatsApp Channel</a>
+</div>
+  </section>
+  
+  
+  
+  
+  <section class="stats-section">
+    <h2 class="section-title">📊 Bot Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-card" data-delay="0">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-num" id="stat1">50+</div>
+        <div class="stat-label">Users</div>
+      </div>
+      <div class="stat-card" data-delay="120">
+        <div class="stat-icon">🤖</div>
+        <div class="stat-num" id="stat2">50+</div>
+        <div class="stat-label">Commands</div>
+      </div>
+      <div class="stat-card" data-delay="240">
+        <div class="stat-icon">🌐</div>
+        <div class="stat-num" id="stat3">24/7</div>
+        <div class="stat-label">Online</div>
+      </div>
+    </div>
+  </section>
+
+  <div style="max-width:780px;margin:0 auto;padding:0 24px;"><div class="divider"></div></div>
+
+  
+  <section>
+    <h2 class="section-title">⚙️ Features</h2>
+    <div class="features-grid">
+      <div class="feature-card" data-delay="0">
+        <div class="feature-glow"></div>
+        <span class="feature-icon">🔄</span>
+        <div class="feature-name">Automation</div>
+        <div class="feature-desc">Auto reply, auto moderation, smart AI commands.</div>
+      </div>
+      <div class="feature-card" data-delay="120">
+        <div class="feature-glow"></div>
+        <span class="feature-icon">🎛️</span>
+        <div class="feature-name">Customization</div>
+        <div class="feature-desc">Prefix, settings, and full control system.</div>
+      </div>
+      <div class="feature-card" data-delay="240">
+        <div class="feature-glow"></div>
+        <span class="feature-icon">🔒</span>
+        <div class="feature-name">Security</div>
+        <div class="feature-desc">Safe login, anti-spam, protected system.</div>
+      </div>
+    </div>
+  </section>
+
+  <div style="max-width:780px;margin:0 auto;padding:0 24px;"><div class="divider"></div></div>
+
+  
+  <section>
+    <h2 class="section-title">💻 Popular Commands</h2>
+    <div class="commands-grid">
+      <div class="cmd-btn" data-delay="0">/menu</div>
+      <div class="cmd-btn" data-delay="80">/play song</div>
+      <div class="cmd-btn" data-delay="160">/group settings</div>
+    </div>
+    <div class="cmd-center-row">
+      <div class="cmd-btn wide" data-delay="240">/ai chat</div>
+    </div>
+  </section>
+
 </div>
 
-<!-- STATS -->
-<div class="section">
-<h2>📊 Bot Statistics</h2>
-<div class="stats">
-<div class="stat">⚡ 50+ Users</div>
-<div class="stat">🤖 50+ Commands</div>
-<div class="stat">🌍 24/7 Online</div>
-</div>
-</div>
-
-<!-- FEATURES -->
-<div class="section">
-<h2>⚙️ Features</h2>
-<div class="container">
-<div class="card">
-<h3>Automation</h3>
-<p>Auto reply, auto moderation, smart AI commands.</p>
-</div>
-<div class="card">
-<h3>Customization</h3>
-<p>Prefix, settings, and full control system.</p>
-</div>
-<div class="card">
-<h3>Security</h3>
-<p>Safe login, anti-spam, protected system.</p>
-</div>
-</div>
-</div>
-
-<!-- COMMANDS -->
-<div class="section">
-<h2>💻 Popular Commands</h2>
-<div class="container">
-<div class="card">/menu</div>
-<div class="card">/play song</div>
-<div class="card">/group settings</div>
-<div class="card">/ai chat</div>
-</div>
-</div>
-
-<!-- FOOTER -->
-<div class="footer">
-© 2026 Vishwa Bot | All Rights Reserved
-</div>
+<footer>
+  <div>© 2026 <span class="teal">Vishwa Bot</span> · All Rights Reserved</div>
+  <div style="margin-top:6px; opacity:0.4;">Built with ⚡ by VISHWA OFC</div>
+</footer>
 
 <script>
-function updateUsers() {
-    let num = Math.floor(Math.random() * 120) + 10;
-    document.getElementById("users").innerText = num;
-}
-setInterval(updateUsers, 2000);
-</script>
 
+const container = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.setProperty('--dx', (Math.random() * 80 - 40) + 'px');
+  p.style.animationDuration = (8 + Math.random() * 12) + 's';
+  p.style.animationDelay = (Math.random() * 12) + 's';
+  container.appendChild(p);
+}
+
+
+const revealEls = document.querySelectorAll('.stat-card, .feature-card, .cmd-btn');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const delay = parseInt(el.dataset.delay || 0);
+      setTimeout(() => el.classList.add('revealed'), delay);
+      observer.unobserve(el);
+    }
+  });
+}, { threshold: 0.15 });
+
+revealEls.forEach(el => observer.observe(el));
+
+
+document.querySelectorAll('.stat-card').forEach(el => {
+  const rect = el.getBoundingClientRect();
+  if (rect.top < window.innerHeight) {
+    const delay = parseInt(el.dataset.delay || 0);
+    setTimeout(() => el.classList.add('revealed'), delay);
+    observer.unobserve(el);
+  }
+});
+
+
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const ripple = document.createElement('span');
+    const rect = this.getBoundingClientRect();
+    ripple.style.cssText = `
+      position:absolute; border-radius:50%;
+      width:8px; height:8px;
+      background:rgba(255,255,255,0.4);
+      left:${e.clientX - rect.left - 4}px;
+      top:${e.clientY - rect.top - 4}px;
+      transform:scale(0); pointer-events:none;
+      animation: rippleAnim 0.5s ease forwards;
+    `;
+    this.style.position = 'relative';
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
+});
+
+const style = document.createElement('style');
+style.textContent = `@keyframes rippleAnim {
+  to { transform: scale(30); opacity: 0; }
+}`;
+document.head.appendChild(style);
+
+document.querySelectorAll('.cmd-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.style.background = 'rgba(0,229,195,0.2)';
+    this.style.borderColor = 'rgba(0,229,195,0.7)';
+    setTimeout(() => {
+      this.style.background = '';
+      this.style.borderColor = '';
+    }, 300);
+  });
+});
+
+// ── PAIRING CODE LOGIC
+const API_BASE = 'https://vishwa-mini-5b145ff48e9e.herokuapp.com';
+let timerInterval = null;
+
+async function requestCode() {
+  const input = document.getElementById('phoneInput');
+  const errMsg = document.getElementById('errorMsg');
+  const btnText = document.getElementById('btnText');
+  const btnSpinner = document.getElementById('btnSpinner');
+  const pairBtn = document.getElementById('pairBtn');
+
+  const raw = input.value.trim().replace(/\D/g, '');
+
+  if (raw.length < 7) {
+    errMsg.classList.remove('hidden');
+    input.style.color = '#ff6b6b';
+    setTimeout(() => { errMsg.classList.add('hidden'); input.style.color = ''; }, 3000);
+    return;
+  }
+
+  errMsg.classList.add('hidden');
+  btnText.textContent = 'Fetching...';
+  btnSpinner.classList.remove('hidden');
+  pairBtn.disabled = true;
+
+  try {
+    const res = await fetch(`${API_BASE}/code?number=${raw}`);
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const data = await res.json();
+
+    const code = data.code || 'කරුණාකර සුළු මොහොතකින් නැවත උත්සාහ කරන්න';
+
+    if (!code) throw new Error('No code in response');
+
+    showCode(code);
+  } catch (err) {
+    btnText.textContent = 'Get Code';
+    btnSpinner.classList.add('hidden');
+    pairBtn.disabled = false;
+    errMsg.textContent = '⚠️ Failed to fetch code. Check number & try again.';
+    errMsg.classList.remove('hidden');
+    setTimeout(() => errMsg.classList.add('hidden'), 4000);
+  }
+}
+
+function showCode(code) {
+  // Split code into 4 parts (e.g. "ABCD-EFGH" or "12345678")
+  const clean = code.replace(/[^a-zA-Z0-9]/g, '');
+  const parts = [];
+  // Try to split into 4 chunks
+  const chunkSize = Math.ceil(clean.length / 4);
+  for (let i = 0; i < 4; i++) {
+    parts.push(clean.slice(i * chunkSize, (i + 1) * chunkSize) || '-');
+  }
+
+  document.getElementById('c1').textContent = parts[0] || '-';
+  document.getElementById('c2').textContent = parts[1] || '-';
+  document.getElementById('c3').textContent = parts[2] || '-';
+  document.getElementById('c4').textContent = parts[3] || '-';
+
+  document.getElementById('pairBox').style.display = 'none';
+  const reveal = document.getElementById('codeReveal');
+  reveal.style.display = 'block';
+
+
+  document.querySelectorAll('.code-digit').forEach(d => {
+    d.style.animation = 'none';
+    void d.offsetWidth;
+    d.style.animation = '';
+  });
+
+ 
+  let secs = 60;
+  document.getElementById('timerCount').textContent = secs;
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    secs--;
+    document.getElementById('timerCount').textContent = secs;
+    if (secs <= 0) {
+      clearInterval(timerInterval);
+      document.getElementById('codeTimer').textContent = '⚠️ Code expired. Please try again.';
+      document.getElementById('codeTimer').style.color = '#ff6b6b';
+    }
+  }, 1000);
+}
+
+function resetPairing() {
+  clearInterval(timerInterval);
+  document.getElementById('codeReveal').style.display = 'none';
+  document.getElementById('pairBox').style.display = 'block';
+  document.getElementById('phoneInput').value = '';
+  document.getElementById('btnText').textContent = 'Get Code';
+  document.getElementById('btnSpinner').classList.add('hidden');
+  document.getElementById('pairBtn').disabled = false;
+  document.getElementById('codeTimer').textContent = '⏳ Valid for <span id="timerCount">60</span>s';
+  document.getElementById('codeTimer').style.color = '';
+}
+
+// Enter key support
+document.addEventListener('DOMContentLoaded', () => {
+  const inp = document.getElementById('phoneInput');
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') requestCode(); });
+});
+</script>
 </body>
 </html>
